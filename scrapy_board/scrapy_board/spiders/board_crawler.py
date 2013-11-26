@@ -15,6 +15,13 @@ html_remove = re.compile(r'\s*<.*?>\s*',re.I|re.U|re.S)
 class BoardCrawler(RedisMixin, CrawlSpider):
     """Spider that reads urls from redis queue (myspider:start_urls)."""
     name = 'board_crawler'
+    allowed_domains = ['36kr.com','aiweibang.com','cyz.org.cn','huxiu.com','zhihu.com']
+    start_urls = ['http://www.36kr.com', 
+            'http://www.aiweibang.com',
+            'http://www.cyz.org.cn',
+            'http://www.huxiu.com',
+            'http://www.zhihu.com']
+
     redis_key = 'boardcrawler:start_urls'
 
     rules = (
