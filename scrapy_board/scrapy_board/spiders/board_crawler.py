@@ -1,6 +1,8 @@
 import re
-from scrapy_redis.spiders import RedisMixin
+from hashes.simhash import simhash as simhashpy
+from cppjiebapy import Tokenize
 
+from scrapy_redis.spiders import RedisMixin
 from scrapy.contrib.spiders import CrawlSpider, Rule
 from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
 
@@ -26,18 +28,25 @@ class BoardCrawler(RedisMixin, CrawlSpider):
 
     def parse_page(self, response):
         url = response.url
+        body = response.body
+        if not isinstance(body, unicode):
+            try:
+                body = body.decode('utf-8')
+            except:
+                body = body.decode('gbk', 'ignore').encode('utf-8', 'replace').decode('utf-8')
 
         item = ScrapyBoardItem()
         item['url'] = url
 
-        tx = tex.TextExtract(response.body)
+        tx = tex.TextExtract(body)
         item['title'] = tx.title
         item['content'] = tx.content.strip()
         if tx.content != '':
+            item['tokens'] = list(Tokenize(tx.content))
+            item['hash'] = long(simhashpy(item['tokens'], 64))
             if len(html_remove.sub('', tx.preview)) < 250:
-                item['preview'] = TextToHtml(tx.content)
+                item['preview'] = tex.TextToHtml(tx.content)
             else:
                 item['preview'] = tx.preview
-            print 'add ', url
             bloom_filter_add(url)
             return item

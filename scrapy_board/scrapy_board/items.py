@@ -10,3 +10,5 @@ class ScrapyBoardItem(Item):
     url = Field()
     content = Field()
     preview = Field()
+    hash = Field()
+    tokens = Field()

@@ -31,7 +31,11 @@ DOWNLOADER_MIDDLEWARES = {
     'scrapy_board.downloadmiddleware.rotate_useragent.RotateUserAgentMiddleware':400,
 }
 
-#LOG_LEVEL = 'INFO'
+ITEM_PIPELINES = [
+    'scrapy_redis.pipelines.RedisPipeline',
+]
+
+LOG_LEVEL = 'ERROR'
 #LOG_FILE = "logs/scrapy.log"
 
 #DUPEFILTER_CLASS = 'scrapy.dupefilter.RFPDupeFilter'
