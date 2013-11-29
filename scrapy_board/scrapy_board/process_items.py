@@ -12,46 +12,55 @@ import Pyro4
 from simserver import SessionServer
 
 #django_path = os.path.dirname(os.path.abspath(__file__))
-#django_path = '/home/gan/project/source/testgit/Similar'
-django_path = '/opt/projects/git_source/Similar'
+django_path = '/home/gan/project/source/testgit/Similar'
+#django_path = '/opt/projects/git_source/Similar'
 sys.path.insert(13, django_path)
 os.environ['DJANGO_SETTINGS_MODULE'] = 'pull.settings'
 
 from django.db.models import Count
 from django.db.models import Q
 from pull.models import *
+from pull.summ import summarize
 
 def find_duplicate(hashm, hash):
-    sims = hashm.find_first([item['hash']])
+    sims = hashm.find_first(hash)
     return sims[0][1]
 
 def main():
     hashm = zerorpc.Client('tcp://yaha.v-find.com:5678')
-    sim_server = Pyro4.Proxy(Pyro4.locateNS().lookup('gensim.testserver'))
+    #sim_server = Pyro4.Proxy(Pyro4.locateNS().lookup('gensim.testserver'))
     r = redis.Redis()
     corpus = []
 
     while True:
         # process queue as FIFO, change `blpop` to `brpop` to process as LIFO
-        source, data = r.blpop(["board_crawler:items"])
-        item = json.loads(data)
+        source, data = r.blpop(["groud_crawler:items", "board_crawler:items"])
         try:
-            url = item['url']
-            try:
-                html = HtmlContent.objects.get(url=url)
-            except:
-                html = HtmlContent(url=url)
-
+            item = json.loads(data)
+        except:
+            print 'Load json error'
+            continue
+        url = item['url']
+        try:
+            html = HtmlContent.objects.get(url=url)
+        except:
+            html = HtmlContent(url=url)
+        try:
             html.title = item['title']
             html.content = item['content']
             html.tags,html.summerize = summarize(html.content)
             html.preview = item['preview']
             html.hash = item['hash']
-            if find_duplicate(hashm, item['hash']) != 0:
-                html.status = 1
-            else:
-                html.status = 0
+
+            #if find_duplicate(hashm, item['hash']) != 0:
+            #    html.status = 1
+            #else:
+            #    html.status = 0
+            html.status = 0
+
             html.save()
+            #print 'Saved url %s' % html.url
+
             '''
             corpus.append({'id':'html_%d' % html.id, 'tokens': item['tokens']})
             if len(corpus) >= 256:
@@ -59,7 +68,7 @@ def main():
                 corpus = []
             '''
         except:
-            print u"Error procesing: %r" % item['url']
+            print 'Load json error', html.url
 
 if __name__ == '__main__':
     main()
