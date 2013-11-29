@@ -12,7 +12,8 @@ import Pyro4
 from simserver import SessionServer
 
 #django_path = os.path.dirname(os.path.abspath(__file__))
-django_path = '/home/gan/project/source/testgit/Similar'
+#django_path = '/home/gan/project/source/testgit/Similar'
+django_path = '/opt/projects/git_source/Similar'
 sys.path.insert(13, django_path)
 os.environ['DJANGO_SETTINGS_MODULE'] = 'pull.settings'
 
@@ -51,12 +52,12 @@ def main():
             else:
                 html.status = 0
             html.save()
-            
+            '''
             corpus.append({'id':'html_%d' % html.id, 'tokens': item['tokens']})
             if len(corpus) >= 256:
                 sim_server.index(corpus)
                 corpus = []
-
+            '''
         except:
             print u"Error procesing: %r" % item['url']
 
