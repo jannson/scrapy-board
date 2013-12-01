@@ -5,7 +5,7 @@
 
 import re
 from hashes.simhash import simhash as simhashpy
-from simash import hash_token
+from simhash import hash_token
 from cppjiebapy import Tokenize
 import extract as tex
 

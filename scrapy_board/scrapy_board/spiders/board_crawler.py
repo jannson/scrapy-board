@@ -10,12 +10,14 @@ class BoardCrawler(CrawlSpider):
     name = 'board_crawler'
     max_count = 0
     # TODO more domains from database
-    allowed_domains = ['36kr.com','aiweibang.com','cyz.org.cn','huxiu.com','zhihu.com']
+    allowed_domains = ['36kr.com','aiweibang.com','cyz.org.cn','huxiu.com','ifeng.com','cnetnews.com.cn']
     start_urls = ['http://www.36kr.com', 
             'http://www.aiweibang.com',
             'http://www.cyz.org.cn',
             'http://www.huxiu.com',
-            'http://www.zhihu.com']
+            'http://www.ifeng.com/',
+            'http://www.cnetnews.com.cn/',
+            ]
 
     #redis_key = 'boardcrawler:start_urls'
 
