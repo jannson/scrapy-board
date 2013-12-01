@@ -49,6 +49,8 @@ class RFPDupeFilter(BaseDupeFilter):
     def request_seen(self, request):
         fp = request_fingerprint(request)
         added = self.server.sadd(self.key, fp)
+        #TODO for bloomfilter
+        '''
         if not added:
             url = request.url
             if url.startswith('http://'):
@@ -57,6 +59,7 @@ class RFPDupeFilter(BaseDupeFilter):
                 url = url[8:]
             with lock:
                 added = url in self.bf
+        '''
         return not added
 
     def close(self, reason):

@@ -5,6 +5,7 @@
 
 import re
 from hashes.simhash import simhash as simhashpy
+from simash import hash_token
 from cppjiebapy import Tokenize
 import extract as tex
 
@@ -38,10 +39,12 @@ def parse_response(response):
     item['content'] = tx.content.strip()
     if tx.content != '':
         item['tokens'] = list(Tokenize(tx.content))
-        item['hash'] = long(simhashpy(item['tokens'], 64))
+        #item['hash'] = long(simhashpy(item['tokens'], 64))
+        item['hash'] = hash_token(item['tokens'])
         if len(html_remove.sub('', tx.preview)) < 250:
             item['preview'] = tex.TextToHtml(tx.content)
         else:
             item['preview'] = tx.preview
-        bloom_filter_add(url)
+        #TODo for using bloom_filter
+        #bloom_filter_add(url)
         return item
