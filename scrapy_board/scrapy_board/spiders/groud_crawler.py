@@ -36,7 +36,7 @@ class GroudCrawler(RedisMixin, CrawlSpider):
         url = self.server.lpop(self.redis_key)
         if url:
             #return self.make_requests_from_url(url)
-            return Request(url, callback='parse_page', dont_filter=True)
+            return Request(url, callback='parse_page', dont_filter=True, meta={'origin_url':url})
 
     def spider_idle(self):
         """Schedules a request if available, otherwise waits."""
@@ -50,4 +50,9 @@ class GroudCrawler(RedisMixin, CrawlSpider):
         self.setup_redis()
 
     def parse_page(self, response):
-        return parse_response(response)
+        item = parse_response(response)
+        try:
+            item['url'] = response.meta['origin_url']
+        except:
+            pass
+        return item

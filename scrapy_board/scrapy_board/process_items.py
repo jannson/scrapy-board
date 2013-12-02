@@ -39,8 +39,12 @@ def main():
     corpus = []
 
     while True:
-        # process queue as FIFO, change `blpop` to `brpop` to process as LIFO
-        source, data = r.blpop(["groud_crawler:items", "board_crawler:items"])
+        try:
+            # process queue as FIFO, change `blpop` to `brpop` to process as LIFO
+            source, data = r.blpop(["groud_crawler:items", "board_crawler:items"], timeout=60)
+        except:
+            continue
+            #TODO index curpos
         try:
             item = json.loads(data)
         except:
@@ -50,19 +54,25 @@ def main():
         try:
             html = HtmlContent.objects.get(url=url)
             #Ignore the exists item, TODO use bloomfilter to ignore
-            if html.content !='' and html.status <= 1:
+            if html.status != 2:
                 continue
         except:
             html = HtmlContent(url=url)
         try:
             html.title = item['title']
+            html.hash = item['hash']
+            if HtmlContent.objects.filter(hash=item['hash']).count() > 0:
+                #Already exists
+                html.status = 5
+                html.save()
+                continue
             html.content = item['content']
             html.tags,html.summerize = summarize(html.content)
             html.summerize = html.summerize[0:399]
             html.preview = item['preview']
-            html.hash = item['hash']
 
             if find_duplicate(hashm, item['hash']) != 0:
+                #Mark as duplicate
                 html.status = 1
             else:
                 html.status = 0
