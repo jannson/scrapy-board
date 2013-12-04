@@ -19,8 +19,8 @@ class ScrapyBoardItem(Item):
     url = Field()
     content = Field()
     preview = Field()
-    hash = Field()
-    tokens = Field()
+    #hash = Field()
+    #tokens = Field()
 
 def parse_response(response):
     url = response.url
@@ -38,9 +38,9 @@ def parse_response(response):
     item['title'] = tx.title
     item['content'] = tx.content.strip()
     if tx.content != '':
-        item['tokens'] = list(Tokenize(tx.content))
+        #item['tokens'] = list(Tokenize(tx.content))
         #item['hash'] = long(simhashpy(item['tokens'], 64))
-        item['hash'] = hash_token(item['tokens'])
+        #item['hash'] = hash_token(item['tokens'])
         if len(html_remove.sub('', tx.preview)) < 250:
             item['preview'] = tex.TextToHtml(tx.content)
         else:
@@ -48,3 +48,5 @@ def parse_response(response):
         #TODo for using bloom_filter
         #bloom_filter_add(url)
         return item
+    else:
+        return None
