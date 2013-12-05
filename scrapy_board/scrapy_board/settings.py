@@ -2,6 +2,10 @@
 #-*-coding:utf-8-*-
 
 import os, sys
+
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
 #django_path = os.path.dirname(os.path.abspath(__file__))
 #django_path = '/home/gan/project/source/testgit/Similar'
 django_path = '/opt/projects/git_source/Similar'

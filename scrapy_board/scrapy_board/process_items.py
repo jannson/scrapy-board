@@ -1,11 +1,12 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 import sys, os, re
+
 import json
 import redis
 import zerorpc
 import traceback
-
+from hashes.simhash import simhash as simhashpy
 from simhash import hash_token
 from cppjiebapy import Tokenize
 
@@ -48,7 +49,7 @@ def main():
     hashm = zerorpc.Client('tcp://yaha.v-find.com:5678')
     #load_hashes(hashm)
     sim_server = Pyro4.Proxy(Pyro4.locateNS().lookup('gensim.testserver'))
-    sim_server.set_autosession(True)
+    #sim_server.set_autosession(False)
     r = redis.Redis()
     corpus = []
 
@@ -65,11 +66,12 @@ def main():
                 #sim_server.set_autosession(False)
                 #sim_server.open_session()
                 sim_server.index(corpus)
-                sim_server.commit()
+                #sim_server.commit()
                 #sim_server.set_autosession(True)
                 corpus = []
             continue
         try:
+            #print source, type(data)
             item = json.loads(data)
         except:
             print 'Load json error'
@@ -83,15 +85,22 @@ def main():
         except:
             html = HtmlContent(url=url)
         try:
-            tokens = [s for s in Tokenize(item['content'])]
             html.title = item['title']
+            html.content = item['content']
+            #print type(html.content)
+            #print html.content.encode('utf-8')
+            #tokens = [s.encode('utf-8') for s in Tokenize(html.content)]
+            tokens = list(Tokenize(html.content))
+            #print ','.join(tokens)
+            #print tokens[0].encode('utf-8')
+            #break
             html.hash = hash_token(tokens)
+            #html.hash = long(simhashpy(tokens))
             if HtmlContent.objects.filter(hash=html.hash).filter(status__gt=2).count() > 0:
                 #Already exists
                 html.status = 5
                 html.save()
                 continue
-            html.content = item['content']
             html.tags,html.summerize = summarize(html.content)
             html.summerize = html.summerize[0:399]
             html.preview = item['preview']
@@ -105,13 +114,16 @@ def main():
             html.save()
             hashm.insert(html.hash)
             if html.status == 0:
-                corpus.append({'id':'html_%d' % html.id, 'tokens': tokens})
+                doc = {}
+                doc['id'] = 'html_%d' % html.id
+                doc['tokens'] = tokens
+                corpus.append(doc)
                 #print 'Append corpus', len(corpus), corpus[-1]['id']
                 if len(corpus) >= CORPUS_LEN:
                     #sim_server.set_autosession(False)
                     #sim_server.open_session()
                     sim_server.index(corpus)
-                    sim_server.commit()
+                    #sim_server.commit()
                     #sim_server.set_autosession(True)
                     corpus = []
 
