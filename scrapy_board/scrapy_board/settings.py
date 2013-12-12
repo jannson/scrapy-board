@@ -1,7 +1,15 @@
 #!/usr/bin/python
 #-*-coding:utf-8-*-
 
-import os
+import os, sys
+
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
+#django_path = os.path.dirname(os.path.abspath(__file__))
+#django_path = '/home/gan/project/source/testgit/Similar'
+django_path = '/opt/projects/git_source/Similar'
+sys.path.insert(13, django_path)
 
 PROJECT_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -44,3 +52,5 @@ LOG_LEVEL = 'ERROR'
 SCHEDULER = "scrapy_board.scheduler.BloomScheduler"
 SCHEDULER_PERSIST = False
 SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.SpiderPriorityQueue'
+
+os.environ['DJANGO_SETTINGS_MODULE'] = 'pull.settings'

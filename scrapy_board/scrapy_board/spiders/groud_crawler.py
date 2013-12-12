@@ -8,10 +8,24 @@ from scrapy.http import Request
 
 from scrapy_board.items import ScrapyBoardItem, parse_response
 
+from pull.models import *
+
+def parse_error(response):
+    try:
+        url = response.meta['origin_url']
+    except:
+        url = response.url
+    try:
+        html = HtmlContent.objects.get(url=url)
+        html.status = 3
+    except:
+        pass
+
 class GroudCrawler(RedisMixin, CrawlSpider):
     name = 'groud_crawler'
 
     redis_key = 'groud_crawler:start_urls'
+    handle_httpstatus_list = [404]
 
     rules = (
         Rule(SgmlLinkExtractor(), callback='parse_page', follow=False),
@@ -51,8 +65,18 @@ class GroudCrawler(RedisMixin, CrawlSpider):
 
     def parse_page(self, response):
         item = parse_response(response)
-        try:
-            item['url'] = response.meta['origin_url']
-        except:
-            pass
-        return item
+        if item:
+            try:
+                item['url'] = response.meta['origin_url']
+            except:
+                pass
+            return item
+        else:
+            parse_error(response)
+
+    def process_exception(self, response, exception, spider):
+        parse_error(response)
+
+    def parse(self, response):
+        if response.status == 404:
+            parse_error(response)

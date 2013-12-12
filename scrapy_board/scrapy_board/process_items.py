@@ -1,10 +1,14 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-import sys, os
+import sys, os, re
+
 import json
 import redis
 import zerorpc
 import traceback
+from hashes.simhash import simhash as simhashpy
+from simhash import hash_tokenpy as hash_token
+from cppjiebapy import Tokenize
 
 import gensim
 from gensim import models, corpora, similarities, matutils
@@ -28,24 +32,41 @@ import logging
 
 logging.basicConfig(level=logging.ERROR)
 
+CORPUS_LEN = 512
+
+def load_hashes(hashm):
+    for obj in HtmlContent.objects.filter(status__lte=2).filter(~Q(content='')):
+        hashm.insert(obj.hash)
+
 def find_duplicate(hashm, hash):
     sims = hashm.find_first(hash)
     return sims[0][1]
 
+def get_title(title):
+    return re.split(r'[-_|]', title)[0]
+
 def main():
     hashm = zerorpc.Client('tcp://yaha.v-find.com:5678')
-    #sim_server = Pyro4.Proxy(Pyro4.locateNS().lookup('gensim.testserver'))
+    #load_hashes(hashm)
+    sim_server = Pyro4.Proxy(Pyro4.locateNS().lookup('gensim.testserver'))
     r = redis.Redis()
     corpus = []
 
     while True:
         try:
             # process queue as FIFO, change `blpop` to `brpop` to process as LIFO
-            source, data = r.blpop(["groud_crawler:items", "board_crawler:items"], timeout=60)
+            source, data = r.blpop(["groud_crawler:items", "board_crawler:items"], timeout=20)
+        except KeyboardInterrupt:
+            print 'Exit'
+            break
         except:
+            #print 'No blpop', len(corpus)
+            if len(corpus) > 0:
+                sim_server.index(corpus)
+                corpus = []
             continue
-            #TODO index curpos
         try:
+            #print source, type(data)
             item = json.loads(data)
         except:
             print 'Load json error'
@@ -59,19 +80,16 @@ def main():
         except:
             html = HtmlContent(url=url)
         try:
-            html.title = item['title']
-            html.hash = item['hash']
-            if HtmlContent.objects.filter(hash=item['hash']).count() > 0:
-                #Already exists
-                html.status = 5
-                html.save()
-                continue
+            html.title = item['title'][0:200]
             html.content = item['content']
+            tokens = list(Tokenize(html.content))
+            html.hash = hash_token(tokens)
+            #html.hash = long(simhashpy(tokens))
             html.tags,html.summerize,html.classify = summarize(html.content)
-            html.summerize = html.summerize[0:399]
+            html.summerize = html.summerize[0:400]
             html.preview = item['preview']
 
-            if find_duplicate(hashm, item['hash']) != 0:
+            if find_duplicate(hashm, html.hash) != 0:
                 #Mark as duplicate
                 html.status = 1
             else:
@@ -79,13 +97,16 @@ def main():
 
             html.save()
             hashm.insert(html.hash)
+            if html.status == 0:
+                doc = {}
+                doc['id'] = 'html_%d' % html.id
+                doc['tokens'] = tokens
+                corpus.append(doc)
+                #print 'Append corpus', len(corpus), corpus[-1]['id']
+                if len(corpus) >= CORPUS_LEN:
+                    sim_server.index(corpus)
+                    corpus = []
 
-            '''
-            corpus.append({'id':'html_%d' % html.id, 'tokens': item['tokens']})
-            if len(corpus) >= 256:
-                sim_server.index(corpus)
-                corpus = []
-            '''
             #print 'Saved url %s' % html.url
         except:
             tb = traceback.format_exc()
