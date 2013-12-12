@@ -67,7 +67,7 @@ def main():
                 html.save()
                 continue
             html.content = item['content']
-            html.tags,html.summerize = summarize(html.content)
+            html.tags,html.summerize,html.classify = summarize(html.content)
             html.summerize = html.summerize[0:399]
             html.preview = item['preview']
 
