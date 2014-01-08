@@ -3,7 +3,7 @@ from scrapy.contrib.spiders import CrawlSpider, Rule
 from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
 from scrapy.exceptions import CloseSpider
 
-from scrapy_board.items import ScrapyBoardItem, parse_response
+from scrapy_board.items import parse_response
 
 class BoardCrawler(CrawlSpider):
     """Spider that reads urls from redis queue (myspider:start_urls)."""
