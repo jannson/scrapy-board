@@ -55,7 +55,7 @@ def main():
     while True:
         try:
             # process queue as FIFO, change `blpop` to `brpop` to process as LIFO
-            source, data = r.blpop(["groud_crawler:items", "board_crawler:items"], timeout=20)
+            source, data = r.blpop(["groud_crawler:items", "followall:items"], timeout=20)
         except KeyboardInterrupt:
             print 'Exit'
             break

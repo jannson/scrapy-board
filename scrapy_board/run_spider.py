@@ -136,6 +136,7 @@ insts = import_plugins()
 
 #Run from random
 insts = random.sample(insts, len(insts))
+
 crawler_process = CrawlerProcess(CrawlerSettings(settings))
 crawler_process.from_plugins(insts)
 crawler_process.start()

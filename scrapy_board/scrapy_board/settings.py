@@ -7,8 +7,8 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 #django_path = os.path.dirname(os.path.abspath(__file__))
-django_path = '/home/gan/project/source/testgit/Similar'
-#django_path = '/opt/projects/git_source/Similar'
+#django_path = '/home/gan/project/source/testgit/Similar'
+django_path = '/opt/projects/git_source/Similar'
 sys.path.insert(13, django_path)
 
 PROJECT_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -20,7 +20,7 @@ NEWSPIDER_MODULE = 'scrapy_board.spiders'
 
 COOKIES_ENABLED = False
 RETRY_ENABLED = False
-#DOWNLOAD_DELAY = 1
+DOWNLOAD_DELAY = 1
 DOWNLOAD_TIMEOUT = 15
 REDIRECT_ENABLED = False
 CONCURRENT_ITEMS = 100
