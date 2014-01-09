@@ -13,4 +13,3 @@ class Kr36Com(SpiderPlugin):
 
     def parse(self, response):
         return super(Kr36Com, self).parse(response)
-

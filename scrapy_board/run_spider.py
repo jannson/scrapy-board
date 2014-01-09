@@ -4,7 +4,7 @@
 import os
 import sys
 import inspect
-
+import random
 import signal
 
 from twisted.internet import reactor, defer
@@ -130,6 +130,12 @@ def setup_spider(inst):
     crawler.start()
 
 insts = import_plugins()
+
+#Just for test
+#insts = [inst for inst in insts if inst.name == 'cnbeta_com']
+
+#Run from random
+insts = random.sample(insts, len(insts))
 crawler_process = CrawlerProcess(CrawlerSettings(settings))
 crawler_process.from_plugins(insts)
 crawler_process.start()
