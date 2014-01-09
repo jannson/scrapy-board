@@ -3,6 +3,8 @@
 from scrapy_board.items import parse_response
 
 class SpiderPlugin(object):
+    name = None
+
     def __init__(self):
         pass
 

@@ -3,6 +3,7 @@ from . import SpiderPlugin
 from scrapy import log
 
 class AiWeiBang(SpiderPlugin):
+    name = 'aiweibang'
     domains = ['aiweibang.com',]
     start_urls = ['http://www.aiweibang.com/',]
     rules = [r'/yuedu/([^/]+)/(\d+)\.html$',]
