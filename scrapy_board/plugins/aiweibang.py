@@ -40,6 +40,12 @@ class CnBeta(SpiderPlugin):
     start_urls = ['http://www.cnbeta.com',]
     rules = [r'/articles/(\d+).htm',]
 
+class Cyzone(SpiderPlugin):
+    name = 'cyzone_cn'
+    domains = ['cyzone.cn',]
+    start_urls = ['http://www.cyzone.cn/',]
+    rules = [r'/a/(\d+)/(\d+)\.html',]
+
 '''
 class IFeng(SpiderPlugin):
     name = 'ifeng_com'
